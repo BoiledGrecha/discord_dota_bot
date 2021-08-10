@@ -1,0 +1,5 @@
+CREATE TABLE users (user_id VARCHAR(21) PRIMARY KEY, dota_id VARCHAR(12) DEFAULT NULL);
+
+INSERT INTO users VALUES('1', '1');
+
+DROP TABLE users;
