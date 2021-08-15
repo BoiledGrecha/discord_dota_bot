@@ -1,5 +1,5 @@
 import requests
-
+# rewrite with IV
 def get_rank(player_id):
     r = requests.get("https://api.opendota.com/api/players/{}".format(player_id))
 

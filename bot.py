@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord.utils import get
 import sys
 import sqlite3
 from rank import get_rank
@@ -61,45 +62,60 @@ async def delete_id(ctx, *args):
 @bot.command()
 async def link_id(ctx, *args):
     
+    user = ctx.message.author
+    
     if not channel_name == ctx.channel.name:
         return
     
     if len(args) != 1:
-        await ctx.channel.send("<@{}> this command needs only your DotaID".format(ctx.message.author.id))
+        await ctx.channel.send("<@{}> this command needs only your DotaID".format(user.id))
         return
 
-    user_id = cur.execute("SELECT dota_id FROM users WHERE user_id = ?;", (ctx.message.author.id,) ).fetchone()
+    user_id = cur.execute("SELECT dota_id FROM users WHERE user_id = ?;", (user.id,) ).fetchone()
 
     if not user_id or user_id[0] == None:
-        cur.execute("INSERT INTO users VALUES(?, ?)", (ctx.message.author.id, args[0]))
-        await ctx.channel.send("<@{}> your DotaID was linked".format(ctx.message.author.id))
+        cur.execute("INSERT INTO users VALUES(?, ?)", (user.id, args[0]))
+        user_id = (args[0], )
+        await ctx.channel.send("<@{}> your DotaID was linked".format(user.id))
     else:
-        cur.execute("UPDATE users SET dota_id = ? WHERE user_id = ?", (args[0], ctx.message.author.id))
-        await ctx.channel.send("<@{}> your DotaID was updated".format(ctx.message.author.id))
+        cur.execute("UPDATE users SET dota_id = ? WHERE user_id = ?", (args[0], user.id))
+        await ctx.channel.send("<@{}> your DotaID was updated".format(user.id))
     conn.commit()
+    
+    needed_rank = get_rank(user_id[0])
+    for i in user.roles:
+        if i.name == "@everyone":
+            continue
+        role = get(user.guild.roles, id = i.id)
+        await user.remove_roles(role)
+    
+    role = get(user.guild.roles, name = needed_rank)
+    if role == None:
+        await user.guild.create_role(name = needed_rank)
+        role = get(user.guild.roles, name = needed_rank)
+    await user.add_roles(role)
 
 @bot.command()
 async def test(ctx, *args):
-    # if ctx.author == bot.user:
-    #     print(" here ")
-    #     return
-    # if len(args) > 0:
-    #     await ctx.channel.send("no words after \'test\' required")
-    # else:
-    #     await ctx.channel.send("Check check")
-    
-    # print(dir(ctx))
-    await ctx.channel.send("<@{}>, hi".format(ctx.message.author.id))
-    print("_______________")
-    print("Channel")
-    print(dir(ctx.message.channel.name))
-    print("_______________")
-    print("---------------Author---------------")
-    print("Bot")
-    print(ctx.message.author.bot)
-    print("ID")
-    print(ctx.message.author.id)
-    print("_______________")
-    print(args)
+    user = ctx.message.author
+    # role = get(user.guild.roles, name = "Test role")
+    # await user.guild.create_role(name = "Lol Kek")
+    # await user.remove_roles(role)
+    # await user.add_roles(role)
+    for i in user.roles:
+        # try:
+            if i.name == "@everyone":
+                continue
+            print("\n_________iiiiii__________\n", i.name, "\n___________________\n")
+            role = get(user.guild.roles, id = i.id)
+            await user.remove_roles(role)
+        # except:
+        #     continue
+    print("\n________ROLES___________________\n")
+    print(user.roles)
+    print("\n_________________________\n")
 
 bot.run(token)
+
+
+
