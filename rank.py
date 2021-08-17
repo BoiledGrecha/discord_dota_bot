@@ -28,5 +28,16 @@ def get_rank(player_id):
         "Ancient",
         "Divine",
     ]
-
-    return "{} {}".format(medals[int(rank_tier[0])], rank_tier[1])
+    
+    gradation = {
+        "1":"I",
+        "2":"II",
+        "3":"III",
+        "4":"IV",
+        "5":"V",
+    }
+    try:
+        rank = "{} {}".format(medals[int(rank_tier[0])], gradation[rank_tier[1]])
+    except:
+        rank = "Unranked"
+    return rank

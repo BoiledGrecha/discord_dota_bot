@@ -6,6 +6,19 @@ import sqlite3
 from rank import get_rank
 from config import token
 
+ALLOWED_TO_DELETE = [
+    "Empty",
+    "Herald",
+    "Guardian",
+    "Crusader",
+    "Archon",
+    "Legend",
+    "Ancient",
+    "Divine",
+    "Immortal",
+    "Immortal,",
+    "Unranked",
+    ]
 
 try:
     conn = sqlite3.connect('database.db')
@@ -56,10 +69,13 @@ async def delete_id(ctx, *args):
 
     cur.execute("DELETE FROM users WHERE user_id = ?;", (ctx.message.author.id, ))
     conn.commit()
-
+    
+    # add deleting role function
+    
     await ctx.channel.send("<@{}> Your DotaID was deleted".format(ctx.message.author.id))
 
 @bot.command()
+@commands.has_permissions(manage_roles=True)
 async def link_id(ctx, *args):
     
     user = ctx.message.author
@@ -84,7 +100,8 @@ async def link_id(ctx, *args):
     
     needed_rank = get_rank(user_id[0])
     for i in user.roles:
-        if i.name == "@everyone":
+        print("\n___________________\n", i.name, "\n___________________\n")
+        if i.name not in ALLOWED_TO_DELETE:
             continue
         role = get(user.guild.roles, id = i.id)
         await user.remove_roles(role)
@@ -102,18 +119,12 @@ async def test(ctx, *args):
     # await user.guild.create_role(name = "Lol Kek")
     # await user.remove_roles(role)
     # await user.add_roles(role)
-    for i in user.roles:
-        # try:
-            if i.name == "@everyone":
-                continue
-            print("\n_________iiiiii__________\n", i.name, "\n___________________\n")
-            role = get(user.guild.roles, id = i.id)
-            await user.remove_roles(role)
-        # except:
-        #     continue
-    print("\n________ROLES___________________\n")
-    print(user.roles)
-    print("\n_________________________\n")
+    roles = user.guild.roles
+    for role in roles:
+        print("\n___________________\n", role.name, "\n___________________\n")
+    # print("\n________ROLES___________________\n")
+    # print(user.roles)
+    # print("\n_________________________\n")
 
 bot.run(token)
 
