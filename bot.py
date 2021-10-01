@@ -2,9 +2,9 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 import sys
+import os
 import sqlite3
 from rank import get_rank
-from config import token
 
 ALLOWED_TO_DELETE = [
     "Empty",
@@ -161,7 +161,7 @@ async def update_rank(ctx, *args):
 #     # print(user.roles)
 #     # print("\n_________________________\n")
 
-bot.run(token)
+bot.run(os.environ["BOT_TOKEN"])
 
 
 
