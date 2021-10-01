@@ -100,7 +100,7 @@ async def link_id(ctx, *args):
     
     needed_rank = get_rank(user_id[0])
     for i in user.roles:
-        print("\n___________________\n", i.name, "\n___________________\n")
+        # print("\n___________________\n", i.name, "\n___________________\n")
         if i.name not in ALLOWED_TO_DELETE:
             continue
         role = get(user.guild.roles, id = i.id)
@@ -113,18 +113,53 @@ async def link_id(ctx, *args):
     await user.add_roles(role)
 
 @bot.command()
-async def test(ctx, *args):
+async def update_rank(ctx, *args):
+    
     user = ctx.message.author
-    # role = get(user.guild.roles, name = "Test role")
-    # await user.guild.create_role(name = "Lol Kek")
-    # await user.remove_roles(role)
-    # await user.add_roles(role)
-    roles = user.guild.roles
-    for role in roles:
-        print("\n___________________\n", role.name, "\n___________________\n")
-    # print("\n________ROLES___________________\n")
-    # print(user.roles)
-    # print("\n_________________________\n")
+    
+    if not channel_name == ctx.channel.name:
+        return
+    
+    if len(args) > 0:
+        await ctx.channel.send("<@{}> this command have to be empty".format(ctx.message.author.id))
+        return
+
+    user_id = cur.execute("SELECT dota_id FROM users WHERE user_id = ?;", (ctx.message.author.id,) ).fetchone()
+
+    if not user_id or user_id[0] == None:
+        await ctx.channel.send("<@{}> you dont have linked id YET!".format(ctx.message.author.id))
+        return
+
+    needed_rank = get_rank(user_id[0])
+    
+    for i in user.roles:
+        if i.name not in ALLOWED_TO_DELETE:
+            continue
+        role = get(user.guild.roles, id = i.id)
+        await user.remove_roles(role)
+    
+    role = get(user.guild.roles, name = needed_rank)
+    
+    if role == None:
+        await user.guild.create_role(name = needed_rank)
+        role = get(user.guild.roles, name = needed_rank)
+    
+    await user.add_roles(role)
+    await ctx.channel.send("<@{}> Your DotaID rank was updated".format(ctx.message.author.id))
+
+# @bot.command()
+# async def test(ctx, *args):
+#     user = ctx.message.author
+#     # role = get(user.guild.roles, name = "Test role")
+#     # await user.guild.create_role(name = "Lol Kek")
+#     # await user.remove_roles(role)
+#     # await user.add_roles(role)
+#     roles = user.guild.roles
+#     for role in roles:
+#         print("\n___________________\n", role.name, "\n___________________\n")
+#     # print("\n________ROLES___________________\n")
+#     # print(user.roles)
+#     # print("\n_________________________\n")
 
 bot.run(token)
 
